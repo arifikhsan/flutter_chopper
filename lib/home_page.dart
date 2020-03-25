@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:chopper/chopper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chopper/data/post_api_service.dart';
+import 'package:flutter_chopper/models/built_post.dart';
 import 'package:flutter_chopper/single_post_page.dart';
 import 'package:provider/provider.dart';
+import 'package:built_collection/built_collection.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -17,41 +19,56 @@ class HomePage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: () async {
-          final response =
-              await Provider.of<PostApiService>(context, listen: false)
-                  .postPost({'key': 'value'});
+          final newPost = BuiltPost(
+            (builder) => builder
+              ..title = 'new title'
+              ..body = 'new body',
+          );
+          final response = await Provider.of<PostApiService>(
+            context,
+            listen: false,
+          ).postPost(newPost);
           print(response.body);
         },
       ),
     );
   }
 
-  FutureBuilder<Response> _buildBody(BuildContext context) {
-    return FutureBuilder<Response>(
+  FutureBuilder<Response<BuiltList<BuiltPost>>> _buildBody(
+      BuildContext context) {
+    return FutureBuilder<Response<BuiltList<BuiltPost>>>(
       future: Provider.of<PostApiService>(context).getPosts(),
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              snapshot.error.toString(),
-              textAlign: TextAlign.center,
-              textScaleFactor: 1.3,
-            ),
-          );
-        }
+        // } else {
         if (snapshot.connectionState == ConnectionState.done) {
-          final List posts = json.decode(snapshot.data.bodyString);
-          return _buildPosts(context, posts);
+          // print(snapshot.data.body);
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                snapshot.error.toString(),
+                textAlign: TextAlign.center,
+                textScaleFactor: 1.3,
+              ),
+            );
+          } else if (snapshot.hasData) {
+            final posts = snapshot.data.body;
+            return _buildPosts(context, posts);
+          }
+        } else if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: Text('waiting'),
+          );
         } else {
           return Center(
             child: CircularProgressIndicator(),
           );
         }
+        // }
       },
     );
   }
 
-  ListView _buildPosts(BuildContext context, List posts) {
+  ListView _buildPosts(BuildContext context, BuiltList<BuiltPost> posts) {
     return ListView.builder(
       itemCount: posts.length,
       padding: EdgeInsets.all(8),
@@ -60,11 +77,11 @@ class HomePage extends StatelessWidget {
           elevation: 4,
           child: ListTile(
             title: Text(
-              posts[index]['title'],
+              posts[index].title,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            subtitle: Text(posts[index]['body']),
-            onTap: () => _navigateToPost(context, posts[index]['id']),
+            subtitle: Text(posts[index].body),
+            onTap: () => _navigateToPost(context, posts[index].id),
           ),
         );
       },

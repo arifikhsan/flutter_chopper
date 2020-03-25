@@ -9,10 +9,9 @@ class MobileDataInterceptor implements RequestInterceptor {
     final isMobile = connectivityResult == ConnectivityResult.mobile;
     final isLarge = request.url.contains(RegExp(r'(/large|/video|/posts)'));
 
-    if (!isMobile && isLarge) {
-      throw MobileDataCostException();
+    if (isMobile && isLarge) {
+      // throw MobileDataCostException();
     }
-
     return request;
   }
 }
