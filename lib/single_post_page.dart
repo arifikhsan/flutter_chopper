@@ -39,6 +39,7 @@ class SinglePostPage extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
             post['title'],
