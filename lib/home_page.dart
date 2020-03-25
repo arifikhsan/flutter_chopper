@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:chopper/chopper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chopper/data/post_api_service.dart';
@@ -38,7 +36,7 @@ class HomePage extends StatelessWidget {
       BuildContext context) {
     return FutureBuilder<Response<BuiltList<BuiltPost>>>(
       future: Provider.of<PostApiService>(context).getPosts(),
-      builder: (context, snapshot) {
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
         // } else {
         if (snapshot.connectionState == ConnectionState.done) {
           // print(snapshot.data.body);
@@ -63,6 +61,9 @@ class HomePage extends StatelessWidget {
             child: CircularProgressIndicator(),
           );
         }
+        return Center(
+          child: CircularProgressIndicator(),
+        );
         // }
       },
     );
